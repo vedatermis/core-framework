@@ -8,6 +8,6 @@
 
         public SuccessDataResult(string message): base(default, true, message) { }
 
-        public SuccessDataResult(): base(default, true) { }
+        public SuccessDataResult(System.Collections.Generic.IList<global::Entities.Concrete.Category> list) : base(default, true) { }
     }
 }
