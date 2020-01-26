@@ -1,7 +1,9 @@
-﻿using Business.Abstract;
+﻿using System.Data.OleDb;
+using Business.Abstract;
 using Entities.Concrete;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 
 namespace WebAPI.Controllers
 {
@@ -87,6 +89,18 @@ namespace WebAPI.Controllers
         {
             var result = _productService.Delete(product);
 
+            if (result.Success)
+            {
+                return Ok(result.Message);
+            }
+
+            return BadRequest(result.Message);
+        }
+
+        [HttpPost("transaction")]
+        public IActionResult TransactionTest(Product product)
+        {
+            var result = _productService.TransactionalOperation(product);
             if (result.Success)
             {
                 return Ok(result.Message);

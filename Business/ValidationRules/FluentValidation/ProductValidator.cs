@@ -13,6 +13,13 @@ namespace Business.ValidationRules.FluentValidation
 
             RuleFor(p => p.UnitPrice).NotEmpty();
             RuleFor(p => p.UnitPrice).GreaterThanOrEqualTo(1);
+
+            RuleFor(x => x.ProductName).Must(StartWith);
+        }
+
+        private bool StartWith(string arg)
+        {
+            return arg.StartsWith("S");
         }
     }
 }
