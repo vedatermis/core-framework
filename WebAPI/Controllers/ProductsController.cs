@@ -1,9 +1,8 @@
-﻿using System.Data.OleDb;
-using Business.Abstract;
+﻿using Business.Abstract;
+using Core.Aspects.Autofac.Caching;
 using Entities.Concrete;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 
 namespace WebAPI.Controllers
 {
@@ -59,6 +58,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("add")]
+        [CacheRemoveAspect("IProductService.Get")]
         public IActionResult Add(Product product)
         {
             var result = _productService.Add(product);
