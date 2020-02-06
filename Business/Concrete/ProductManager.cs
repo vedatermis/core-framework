@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Business.Abstract;
+using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Caching;
@@ -31,6 +32,7 @@ namespace Business.Concrete
             return new SuccessDataResult<List<Product>>( _productDal.GetList().ToList());
         }
 
+        [SecuredOperation("Product.List,Admin")]
         [CacheAspect(duration: 1)]
         public IDataResult<List<Product>> GetListByCategory(int categoryId)
         {
