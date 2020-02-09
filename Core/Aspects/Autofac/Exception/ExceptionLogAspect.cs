@@ -1,35 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Castle.DynamicProxy;
 using Core.CrossCuttingConcerns.Logging;
 using Core.CrossCuttingConcerns.Logging.Log4Net;
 using Core.Utilities.Interceptors.Autofac;
 
-namespace Core.Aspects.Autofac.Logging
+namespace Core.Aspects.Autofac.Exception
 {
-    public class LogAspect: MethodInterception
+    public class ExceptionLogAspect: MethodInterception
     {
         private LoggerServiceBase _loggerServiceBase;
 
-        public LogAspect(Type loggerService)
+        public ExceptionLogAspect(Type loggerService)
         {
             if (loggerService.BaseType != typeof(LoggerServiceBase))
             {
-                throw new System.Exception("Wrong logger service");
+                throw new System.Exception("Wrong logger type");
             }
-            
+
             _loggerServiceBase = (LoggerServiceBase) Activator.CreateInstance(loggerService);
         }
 
-        protected override void OnBefore(IInvocation invocation)
+        protected override void OnException(IInvocation invocation, System.Exception exception)
         {
-            _loggerServiceBase.Info(GetLogDetail(invocation));
+            var logDetailWithException = GetLogDetail(invocation);
+            logDetailWithException.ExceptionMessage = exception.Message;
+            _loggerServiceBase.Error(logDetailWithException);
         }
 
-        private LogDetail GetLogDetail(IInvocation invocation)
+        private LogDetailWithException GetLogDetail(IInvocation invocation)
         {
             var logParameters = new List<LogParameter>();
+
             for (int i = 0; i < invocation.Arguments.Length; i++)
             {
                 logParameters.Add(new LogParameter
@@ -40,13 +42,13 @@ namespace Core.Aspects.Autofac.Logging
                 });
             }
 
-            var logDetail = new LogDetail
+            var logDetailWithExpception = new LogDetailWithException
             {
                 MethodName = invocation.Method.Name,
                 LogParameters = logParameters
             };
 
-            return logDetail;
+            return logDetailWithExpception;
         }
     }
 }

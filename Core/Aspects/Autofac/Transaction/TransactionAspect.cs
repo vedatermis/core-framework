@@ -1,5 +1,4 @@
-﻿using System;
-using Castle.DynamicProxy;
+﻿using Castle.DynamicProxy;
 using Core.Utilities.Interceptors.Autofac;
 using System.Transactions;
 
@@ -16,7 +15,7 @@ namespace Core.Aspects.Autofac.Transaction
                     invocation.Proceed();
                     transaction.Complete();
                 }
-                catch (Exception exception)
+                catch (System.Exception exception)
                 {
                     transaction.Dispose();
                     throw;
