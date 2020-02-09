@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Castle.DynamicProxy;
 using Core.CrossCuttingConcerns.Logging;
@@ -28,11 +29,17 @@ namespace Core.Aspects.Autofac.Logging
 
         private LogDetail GetLogDetail(IInvocation invocation)
         {
-            var logParameters = invocation.Arguments.Select(x => new LogParameter
+            var logParameters = new List<LogParameter>();
+            for (int i = 0; i < invocation.Arguments.Length; i++)
             {
-                Value = x,
-                Type = x.GetType().Name
-            }).ToList();
+                logParameters.Add(new LogParameter
+                {
+                    Name = invocation.GetConcreteMethod().GetParameters()[i].Name,
+                    Value = invocation.Arguments[i],
+                    Type = invocation.Arguments[i].GetType().Name
+                });
+            }
+
 
             var logDetail = new LogDetail
             {
