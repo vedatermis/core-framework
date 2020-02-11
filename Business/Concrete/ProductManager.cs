@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Business.Abstract;
-using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Caching;
 using Core.Aspects.Autofac.Logging;
 using Core.Aspects.Autofac.Transaction;
 using Core.Aspects.Autofac.Validation;
+using Core.Business;
 using Core.CrossCuttingConcerns.Logging.Log4Net.Loggers;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
@@ -19,10 +18,12 @@ namespace Business.Concrete
     public class ProductManager : IProductService
     {
         private readonly IProductDal _productDal;
+        private readonly ICategoryService _categoryService;
 
-        public ProductManager(IProductDal productDal)
+        public ProductManager(IProductDal productDal, ICategoryService categoryService)
         {
             _productDal = productDal;
+            _categoryService = categoryService;
         }
 
         public IDataResult<Product> GetById(int productId)
@@ -46,8 +47,37 @@ namespace Business.Concrete
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
+            IResult result = BusinessRules.Run(CheckIfProductNameExist(product.ProductName));
+
+            if (result != null)
+            {
+                return result;
+            }
+
             _productDal.Add(product);
             return new SuccessResult(Messages.ProductAdded);
+        }
+
+        private IResult CheckIfProductNameExist(string productName)
+        {
+            if (_productDal.Get(p => p.ProductName == productName) != null)
+            {
+                return new ErrorResult("Product already added");
+            }
+
+            return new SuccessResult();
+        }
+
+        private IResult CheckIfCategoryIsEnabled()
+        {
+            var result = _categoryService.GetList();
+
+            if (result.Data.Count < 10)
+            {
+                return new ErrorResult("Product already added");
+
+            }
+            return new SuccessResult();
         }
 
         public IResult Delete(Product product)
